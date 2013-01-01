@@ -43,10 +43,10 @@ isPrefix (x:xs) (y:ys)
 
 --pre: xs is a prefix of ys
 removePrefix :: String -> String -> String
-removePrefix xs ys = drop (length xs) ys
+removePrefix xs = drop (length xs)
 
 removePrefix2 :: Eq a => [a] -> [a] -> [a]
-removePrefix2 xs ys = drop (length xs) ys
+removePrefix2 xs = drop (length xs)
 
 suffixes :: [ a ] -> [ [ a ] ]
 suffixes [] = [[]]
@@ -79,11 +79,15 @@ getIndices (Node []) = []
 getIndices (Leaf n) = [n]
 getIndices (Node ((s, t):rest))= (getIndices t) ++ getIndices (Node rest)
 
+getIndices2 :: SuffixTree -> [Int]
+getIndices2 (Leaf n) = [n]
+getIndices2 (Node trees) = concatMap getIndices2 (map snd trees)
+
 -- partitions by largest prefix
 partition :: Eq a => [ a ] -> [ a ] -> ( [ a ], [ a ], [ a ] )
 partition as bs = (x, (removePrefix2 x as), (removePrefix2 x bs))
   where
-    x = head(zs)
+    x = if zs == [] then [] else head(zs) 
     zs = [z | z <- prefixes as, y <- prefixes bs, z==y]
 
 --data SuffixTree = Leaf Int | Node [ ( String, SuffixTree ) ]
@@ -102,12 +106,25 @@ findSubstringsInTree x (Node ((s, t):rest))
   where
     (a, b, c) = Main.partition s x
 
---insert :: (String, Int) -> SuffixTree -> SuffixTree
+-- != is java
+-- must differentiate between SuffixTree and [(String, SuffixTree)]
+-- tree is a SuffixTree, rest is a list
+insert :: (String, Int) -> SuffixTree -> SuffixTree
+insert (s, n) (Node []) = Node[(s, Leaf n)]
+insert (s, n) (Node ((a, tree): rest))
+  | p == [] = Node ((a, tree): deNode(Main.insert (s, n) (Node rest)))
+  | p == a  = Node ((a, (Main.insert (s1, n) tree)):rest)
+  | p /= a = Node ((p, Node[(s1, Leaf n), (a1, tree)]):rest)
+    where 
+      (p, s1, a1) = Main.partition s a
+
+deNode :: SuffixTree -> [(String, SuffixTree)]
+deNode (Node list) = list
 
 --This function is given
---buildTree :: String -> SuffixTree 
---buildTree s
--- = foldl ( flip ins ) ( Node [] ) ( zip ( suffixes s ) [0..length s-1] )
+buildTree :: String -> SuffixTree 
+buildTree s
+ = foldl ( flip Main.insert ) ( Node [] ) ( zip ( suffixes s ) [0..length s-1] )
 
 --longestRepeatedSubstringInTree :: SuffixTree -> String
 
