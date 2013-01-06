@@ -223,10 +223,13 @@ buildGraph p
     graph :: Program -> Int -> Int -> Graph
     graph [] n t
         = []
+
     graph ((Assign _ _) : stats) n t
         = if null stats
             then [(n, [t])]
-            else [(n, [(n+1)])] ++ graph stats (n+1) t
+            else [(n, [(n+1)])] ++ 
+                    graph stats (n+1) t
+
     graph ((Cond exp p1 p2): stats) n t
         = [(n, [(n+1), rNo])] ++
             (graph p1 (n+1) t') ++
@@ -239,6 +242,7 @@ buildGraph p
         rNo = (n+1) + dp1
         dp1 = deepMax p1
         nAfterStat = dp1 + n + deepMax p2
+
     graph ((While _ p1): stats) n t
         = [(n, [(n+1), t'])] ++
             (graph p1 (n+1) n) ++
