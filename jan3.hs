@@ -201,7 +201,7 @@ graph (p:program) = graph' (p:program) 1
   graph' ((Cond exp p1 p2):pro) n = (n, n2@(map fst (graph' p1 n+1))++(map fst (graph' p2 n3@((maximum n2)+1)))): (graph' program ((maximum n3)+1)) 
   graph' ((While exp p1):pro) n =  
 -}
-
+{-
 graph :: Program -> Graph
 graph p = graph' p 1
         where
@@ -213,10 +213,46 @@ graph p = graph' p 1
         graph' ((Cond exp p1 p2): pro) n = (n, [(n+1), (deepMax p1 + n + 1)])
                                             : 
         graph' ((While exp p1): pro) n = ()
+-}
+
+--Pre: All programs are non-empty
+buildGraph :: Program -> Graph
+buildGraph p
+    = graph p 1 0
+    where
+    graph :: Program -> Int -> Int -> Graph
+    graph [] n t
+        = []
+    graph ((Assign _ _) : stats) n t
+        = if null stats
+            then [(n, [t])]
+            else [(n, [(n+1)])] ++ graph stats (n+1) t
+    graph ((Cond exp p1 p2): stats) n t
+        = [(n, [(n+1), rNo])] ++
+            (graph p1 (n+1) t') ++
+            (graph p2 rNo t') ++
+            (graph stats nAfterStat t)
+        where
+        t' = if null stats
+                then t
+                else nAfterStat
+        rNo = (n+1) + dp1
+        dp1 = deepMax p1
+        nAfterStat = dp1 + n + deepMax p2
+    graph ((While _ p1): stats) n t
+        = [(n, [(n+1), t'])] ++
+            (graph p1 (n+1) n) ++
+            (graph stats rNo t)
+        where
+        dp1 = deepMax p1
+        rNo = dp1 + n + 1
+        t' = if null stats
+                    then t
+                    else rNo
 
 deepMax :: Program -> Int
 deepMax [] = 0
 deepMax ((Assign _ _): statements) = 1 + deepMax statements
-deepMax ((Cond _ p1 p2): statements) = 2 + (deepMax p1) + (deepMax p2)
+deepMax ((Cond _ p1 p2): statements) = 1 + (deepMax p1) + (deepMax p2)
                                         + (deepMax statements)
 deepMax ((While _ p1): statements) = 1 + (deepMax p1) + (deepMax statements)
