@@ -88,47 +88,45 @@ inferType (App e1 e2) env
 ------------
 
 -- PART III
-{-
-data Expr = Number Int |
-            Boolean Bool |
-            Id String  |
-            Prim String |
-            Cond Expr Expr Expr |
-            App Expr Expr |
-            Fun String Expr
-
-data Type = TInt |
-            TBool |
-            TFun Type Type |
-            TVar String |
-            TErr 
--}
 
 applySub :: Sub -> Type -> Type
 applySub s (TFun t1 t2) = TFun (applySub s t1) (applySub s t2)
 applySub s (TVar string) = tryToLookUp string (TVar string) s
 applySub s rest = rest
 
+-- this will always work, but the first on its own won't.
+test:: Int -> Int
+test n 
+  | n == 2 = 8
+test _ = 9
 
 --does Haskell proceed to next case if the guards do not kick in?
 --problem being need to cover all type combinations
 --Not in scope: data constructor `Maybe'? MAYBE IS THE TYPE CONSTRUCTOR YOU FOOL. You need the data constructors Nothing or Just.
 unifyPairs :: [ ( Type, Type ) ] -> Sub -> Maybe Sub
-unifyPairs [] sub = Just sub
-unifyPairs ((TInt, TInt):rest) sub = unifyPairs rest sub
-unifyPairs ((TBool, TBool):rest) sub = unifyPairs rest sub
+unifyPairs [] sub 
+  = Just sub
+unifyPairs ((TInt, TInt):rest) sub 
+  = unifyPairs rest sub
+unifyPairs ((TBool, TBool):rest) sub 
+  = unifyPairs rest sub
 unifyPairs ((TVar v, TVar v'):rest) sub
   | v == v' = unifyPairs rest sub
+  | otherwise = Nothing
 unifyPairs ((TVar v, rT):rest) sub
   | occurs v rT = Nothing
-  | otherwise = unifyPairs (map (\(a, b) -> (applySub [(v, rT)] a, applySub [(v, rT)] b)) rest) ((v,rT):sub)
+  | otherwise   = unifyPairs 
+       (map (\(a, b) -> (applySub [(v, rT)] a, applySub [(v, rT)] b)) rest)
+       ((v,rT):sub)
 unifyPairs ((rT, TVar v):rest) sub
   | occurs v rT = Nothing
-  | otherwise = unifyPairs (map (\(a, b) -> (applySub [(v, rT)] a, applySub [(v, rT)] b)) rest) ((v,rT):sub)
-unifyPairs ((TFun t1 t2, TFun t3 t4):rest) sub = unifyPairs ((t1,t2):(t3,t4):rest) sub
-unifyPairs ((TFun t1 t2, rT):rest) sub = unifyPairs ((t1,t2):rest) sub
-unifyPairs ((rT, TFun t1 t2):rest) sub = unifyPairs ((t1,t2):rest) sub
-unifyPairs _ _ = Nothing
+  | otherwise   = unifyPairs 
+       (map (\(a, b) -> (applySub [(v, rT)] a, applySub [(v, rT)] b)) rest)
+       ((v,rT):sub)
+unifyPairs ((TFun t1 t2, TFun t3 t4):rest) sub 
+  = unifyPairs ((t1,t3):(t2,t4):rest) sub
+unifyPairs _ _ 
+  = Nothing
 
 unify :: Type -> Type -> Maybe Sub
 unify t t'

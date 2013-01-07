@@ -166,13 +166,7 @@ eval :: Exp -> State -> Int
 eval (Const i) _ = i
 eval (Var i) state = lookUp i state 
 eval (BinOp op e1 e2) state = apply op (eval e1 state) (eval e2 state) 
-{-
-data Statement = Assign Id Exp |
-                 Cond Exp Program Program |
-                 While Exp Program
-                 deriving ( Eq, Ord, Show )
-type State = [ ( Id, Int ) ]
--}
+
 executeStatement :: Statement -> State -> State
 executeStatement (Assign i e) state = update (id, val) state
   where (id, val) = (i, (eval e state))
@@ -191,29 +185,6 @@ execute (p:program) state = execute program (executeStatement p state)
 -- Part III
 
 type Graph = [ ( Int, [ Int ] ) ]
-{-
-graph :: Program -> Graph
-graph (p:program) = graph' (p:program) 1
-  where
-  graph' :: Program -> Int -> Graph
-  graph' [] n = [(n, [0])]
-  graph' ((Assign i exp):pro) n = (n, [n+1]): (graph' program (n+1))
-  graph' ((Cond exp p1 p2):pro) n = (n, n2@(map fst (graph' p1 n+1))++(map fst (graph' p2 n3@((maximum n2)+1)))): (graph' program ((maximum n3)+1)) 
-  graph' ((While exp p1):pro) n =  
--}
-{-
-graph :: Program -> Graph
-graph p = graph' p 1
-        where
-        graph' :: Program -> Int -> [Int] -> Graph
-        graph' [] n is = if null is 
-                            then [(n, 0)]
-                            else [(n, head is)]
-        graph' ((Assign i exp): pro) n is = (n, [n+1]): graph' pro (n+1) is
-        graph' ((Cond exp p1 p2): pro) n = (n, [(n+1), (deepMax p1 + n + 1)])
-                                            : 
-        graph' ((While exp p1): pro) n = ()
--}
 
 --Pre: All programs are non-empty
 buildGraph :: Program -> Graph

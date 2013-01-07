@@ -24,7 +24,8 @@ fact n = product [n, n-1 .. 1]
 sugarEx :: String -> String
 --sugarEx (xs) = reverse ( init (sort xs))
 sugarEx (x:xs) = reverse $ init $ sort (x:xs)
-sugarEx xs = (reverse . init . sort) xs
+sugarEx2 :: String -> String
+sugarEx2 = (reverse . init . sort)
 
 perm :: Int -> Int -> Int
 perm n r = product [n, n-1 .. n-r+1]
@@ -98,6 +99,10 @@ isPrime :: Int -> Bool
 isPrime 2 = True
 isPrime n = not( any (==0) ( map (n `mod`) [2 .. findBound n] ) )
 
+isPrime2 :: Int -> Bool
+isPrime2 2 = True
+isPrime2 n = any ((/=0).(n `mod`)) [2 .. findBound n]
+
 findBound :: Int -> Int
 findBound = (ceiling . sqrt . fromIntegral)
 
@@ -121,7 +126,8 @@ backwards as = foldr plus [] as
   plus a as = as ++ [a]
 
 transpose :: String -> String -> String -> String
-transpose as bs cs = zipWith (!!) (replicate (length as) as) (indices bs cs)
+transpose as bs cs 
+  = zipWith (!!) (replicate (length as) as) (indices bs cs)
   where
   indices :: String -> String -> [Int]
   indices [] cs     = []

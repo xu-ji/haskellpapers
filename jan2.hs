@@ -88,9 +88,9 @@ neg bs = map negNode bs
     | num == -2 || num == -1 = -(3 + num)
     | otherwise = num
 
-
 test4 = neg [(1,(1,2,3)),(2,(2,-2,-2)),(3,(2,-2,-1))]
 test5 = neg [(1,(2,2,3)),(2,(1,-2,-2)),(3,(1,-2,-1))]
+
 -- could do with map too - map over the bs to find the one which fits n, then find the one which fits either i2 or i3 as necessary.
 -- then stop when an n of -2 or -1 is reached, in which case return it.
 -- so guards execute everything that fits? What if one returns something?
@@ -147,7 +147,6 @@ test7 = checkSat [(1,(1,2,8)),(8,(2,-2,-1)),(2,(2,-2,-2))] [(2,True),(1,True)]
 --     in the Index list; there are no other elements
 --The question suggests the following definition (in terms of buildBDD')
 --but you are free to implement the function differently if you wish.
-
 
 -- RELIES ON INDS BEING IN CORRECT ORDER - for this, in ascending order.
 -- from just the inds, we know 90% of the tree already.
@@ -207,8 +206,10 @@ type ROBDD = [ ROBDDNode ]
 {-
 neg1 = neg [(1,(1,2,3)),(2,(2,-2,-2)),(3,(2,-2,-1))]
 neg2 = neg [(1,(2,2,3)),(2,(1,-2,-2)),(3,(1,-2,-1))]
-check1 = checkSat [(1,(1,2,3)),(2,(2,-2,-2)),(3,(2,-2,-1))] [(1,True),(2,False)]
-check2 = checkSat [(1,(1,2,8)),(8,(2,-2,-1)),(2,(2,-2,-2))] [(2,True),(1,True)]
+check1 = checkSat [(1,(1,2,3)),(2,(2,-2,-2)),(3,(2,-2,-1))] 
+         [(1,True),(2,False)]
+check2 = checkSat [(1,(1,2,8)),(8,(2,-2,-1)),(2,(2,-2,-2))] 
+         [(2,True),(1,True)]
 build1 = buildBDD b3 [1]
 build2 = buildBDD b2 [4]
 build3 = buildBDD b5 [2,3,7]
