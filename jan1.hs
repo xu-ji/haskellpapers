@@ -90,9 +90,6 @@ partition as bs = (x, (removePrefix2 x as), (removePrefix2 x bs))
     x = if zs == [] then [] else head(zs) 
     zs = [z | z <- prefixes as, y <- prefixes bs, z==y]
 
---data SuffixTree = Leaf Int | Node [ ( String, SuffixTree ) ]
---                 deriving (Eq,Ord,Show)
-
 -- second case will never happen on its own, leaf does not contain a string. However, it's a base case.
 -- second call for isPrefix - searching haskellha for string "happy". "ha" matches. Then search kellha for "ppy" to find whole substring (does not find in this case).
 -- c is the rest of the substring we are looking for. 
@@ -101,12 +98,14 @@ findSubstringsInTree x (Node []) = []
 findSubstringsInTree x (Leaf n) = [n]
 findSubstringsInTree x (Node ((s, t):rest))
   | isPrefix x s = (getIndices t) ++ (findSubstringsInTree x (Node rest))
-  | isPrefix s x = if (s == []) then findSubstringsInTree x (Node rest) else (findSubstringsInTree c t) ++ (findSubstringsInTree x (Node rest))
+  | isPrefix s x = if (s == []) then 
+      findSubstringsInTree x (Node rest) else 
+      (findSubstringsInTree c t) ++ (findSubstringsInTree x (Node rest))
   | otherwise = findSubstringsInTree x (Node rest)
   where
     (a, b, c) = Main.partition s x
 
--- != is java
+-- not and /= are used in Haskell.
 -- must differentiate between SuffixTree and [(String, SuffixTree)]
 -- tree is a SuffixTree, rest is a list
 insert :: (String, Int) -> SuffixTree -> SuffixTree
