@@ -158,14 +158,17 @@ test7 = checkSat [(1,(1,2,8)),(8,(2,-2,-1)),(2,(2,-2,-2))] [(2,True),(1,True)]
 
 buildBDD :: BExp -> [ Index ] -> BDD
 buildBDD exp inds = buildBDD' exp 1 0 [] inds
-
-buildBDD' :: BExp -> Id -> Int -> [Bool] -> [ Index ] -> BDD
-buildBDD' (Not exp) currId pos bools inds = neg(buildBDD' exp currId pos bools inds)
-buildBDD' exp currId pos bools inds
-  | pos == length(inds) - 1 = [(currId, (inds!!pos, fromBool(eval exp (zip inds (bools++[False]))), fromBool(eval exp (zip inds (bools++[True])))))]
-  | otherwise = [(currId, (inds!!pos, currId*2, currId*2+1))] ++
-                (buildBDD' exp (currId*2) (pos+1) (bools++[False]) inds) ++
-                (buildBDD' exp (currId*2+1) (pos+1) (bools++[True]) inds)
+  where
+  buildBDD' :: BExp -> Id -> Int -> [Bool] -> [ Index ] -> BDD
+  buildBDD' (Not exp) currId pos bools inds 
+    = neg(buildBDD' exp currId pos bools inds)
+  buildBDD' exp currId pos bools inds
+    | pos==(length inds) - 1 = [(currId, (inds!!pos, 
+                               fromBool(eval exp (zip inds (bools++[False]))),
+                               fromBool(eval exp (zip inds (bools++[True])))))]
+    | otherwise = [(currId, (inds!!pos, currId*2, currId*2+1))]++
+                  (buildBDD' exp (currId*2) (pos+1) (bools++[False]) inds)++
+                  (buildBDD' exp (currId*2+1) (pos+1) (bools++[True]) inds)
 
 buildBDD2 :: BExp -> [Index] -> BDD
 buildBDD2 exp inds = build' exp 1 [] inds
