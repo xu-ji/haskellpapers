@@ -186,6 +186,51 @@ execute (p:program) state = execute program (executeStatement p state)
 
 type Graph = [ ( Int, [ Int ] ) ]
 
+buildGraph2 :: Program -> Graph
+buildGraph2 p = g
+  where
+  (r, n, g) = graph' p 1 0 []
+
+--  graph' takes a program, START (next available label), END (where to link to at the end)
+--  and the graph accumulated so far
+--  returns (ROOT, NEXTSTART, g) 
+--  = (r, n, g) where g is the new graph, r is its root ie top label, n is the next available label
+  graph' :: Program -> Int -> Int -> Graph -> (Int, Int, Graph)
+  graph' [] n endlink g
+    = (endlink, n, g) -- should be switched??
+  graph' (s:programs) n endlink g
+    = graphSt s n' r g'
+    where
+    (r, n', g') = graph' programs n endlink g
+-- the root of the programs graph becomes the endlink of the graph appended onto it
+
+
+-- graphSt takes a single statement, the START, the END
+-- and the resulting graph of graphing all the rest of the programs
+-- to create the overarching graph, with its root and next available label
+-- (output same as graph')
+  graphSt :: Statement -> Int -> Int -> Graph -> (Int, Int, Graph)
+  graphSt (Assign x e) start end g
+    = (start, start+1, (start, [end]):g)
+
+-- the only one where no programs have to be recursively built!
+  graphSt (Cond p pro1 pro2) start end g
+    = (start, n2, (start, [r1, r2]):g2)
+
+    where
+    (r1, n1, g1) = graph' pro1 (start + 1) end g  
+    (r2, n2, g2) = graph' pro2 r1 end g
+
+  graphSt (While p pro) start end g
+    = (start, n1, (start, [r1, end]):g1)
+   
+    where
+    (r1, n1, g1) = graph' pro (start + 1) start g
+-- returns to the beginning - so the endlink MUST be start!
+
+
+
+
 --Pre: All programs are non-empty
 buildGraph :: Program -> Graph
 buildGraph p
